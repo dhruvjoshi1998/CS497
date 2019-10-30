@@ -72,6 +72,30 @@ def stacked_G_D(Generator, Discriminator):
     model.add(Discriminator)
     return model
 
+#Decoder
+def decoder(InputShape):
+    model = Sequential()
+    model.add(Reshape((InputShape, 1), input_shape=(InputShape,)))
+    model.add(Conv1D(32, 100, strides=7, padding='valid'))
+    model.add(ReLU())
+    model.add(BatchNormalization(momentum=0.9))
+    model.add(Dropout(rate=0.1))
+    
+    model.add(Conv1D(16, 50, strides=5, padding='valid'))
+    model.add(ReLU())
+    model.add(BatchNormalization(momentum=0.9))
+    model.add(Dropout(rate=0.1))
+
+    model.add(Conv1D(8, 25, strides=3, padding='valid'))
+    model.add(ReLU())
+    model.add(BatchNormalization(momentum=0.9))
+    model.add(Dropout(rate=0.1))
+    model.add(Flatten())
+    model.add(Dense(InputShape))
+
+    return model
+
+
 # Encoder
 def encoder(InputShape, EncodeSize):
     model = Sequential()

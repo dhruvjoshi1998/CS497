@@ -11,6 +11,7 @@ import pandas as pd
 import tensorflow as tf
 import keras
 from keras.optimizers import Adam
+from scipy.io.wavfile import write
 
 import ganModels
 
@@ -26,6 +27,25 @@ BATCH_SIZE = 512
 NOISE_DIM = 20
 
 SAVE_INTERVAL = 3
+
+def load_decoder():
+	return load_model("models/decoder.h5")
+
+def train_decoder(phrase, save_location):
+	X = load_dataset(phrase)
+	decoder = gamModels.decoder(AUDIO_SHAPE)
+	decoder.compile(loss="binary_crossentropy", optimizer=Adam(lr=0.0002, beta_1=0.9), metrics=['accuracy'])
+	decoder.fit(rescale(normalize_data(X)),X,epochs = 20,batch_size = 128)
+	decoder.save("models/decoder.h5")
+
+def test_decoder(word, count):
+	decoder = load_decoder()
+	X = load_dataset(word)
+	Y = rescale(normalize_data(X))
+	Z = decoder.predict(Y)
+	for i in range(count):
+		write("output/real"+str(i)+".wav", 16000, X[i])
+		write("output/synt"+str(i)+".wav", 16000, Z[i])
 
 def load_dataset(phrase):
 	wav_paths = os.listdir("data/augmented_dataset/augmented_dataset/"+phrase)
