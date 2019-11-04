@@ -157,11 +157,11 @@ if __name__ == "__main__":
 
 	# preproccess data
 	data = load_dataset("house")
-	norm_data = normalize_data(data)
-	rescaled_data = rescale(data)
+	#norm_data = normalize_data(data)
+	#rescaled_data = rescale(data)
 
 	# train
-	train(rescaled_data, "house")
+	train(data, "house")
 
 
 
