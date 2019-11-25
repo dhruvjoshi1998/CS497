@@ -39,4 +39,4 @@ def mixed_model():
 	x = Dense(256, activation = 'sigmoid')(x)
 	x = Dense(1, activation = 'sigmoid')(x)
 
-	model = Model([mpl.input,cnn.input], x)
+	model = Model([mlp.input,cnn.input], x)
