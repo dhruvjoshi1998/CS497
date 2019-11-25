@@ -5,16 +5,16 @@ models.py
 from keras.models import Sequential, Model
 from keras.layers import Conv2D, MaxPooling2D, Dense, Dropout, concatenate, Flatten
 
-NUM_PIPELINES = 2
+NUM_PIPELINES = 5
 
 
 def make_cnn():
 	model = Sequential()
-	model.add(Conv2D(64, kernel_size = (15, 15), strides = 2, activation='relu', input_shape = (1024, 768, 3)))
-	model.add(Conv2D(128, kernel_size = (7, 7), strides = 2, activation='relu'))
+	model.add(Conv2D(16, kernel_size = (15, 15), strides = 2, activation='relu', input_shape = (768, 1024, 3)))
+	model.add(Conv2D(16, kernel_size = (7, 7), strides = 2, activation='relu'))
 	for _ in range(NUM_PIPELINES):
-		model.add(Conv2D(256, kernel_size = (3, 3), activation='relu'))
-		model.add(Conv2D(256, kernel_size = (5, 5), activation='relu'))
+		# model.add(Conv2D(256, kernel_size = (3, 3), activation='relu'))
+		# model.add(Conv2D(256, kernel_size = (5, 5), activation='relu'))
 		model.add(MaxPooling2D(pool_size=(2, 2)))
 		model.add(Dropout(rate=0.125))
 	model.add(Flatten())
@@ -33,10 +33,10 @@ def mixed_model():
 
 	cout = concatenate([mlp.output, cnn.output])
 
-	x = Dense(256, activation = 'relu')(cout)
-	x = Dense(256, activation = 'relu')(x)
-	x = Dense(128, activation = 'relu')(x)
-	x = Dense(64, activation = 'relu')(x)
+	x = Dense(16, activation = 'relu')(cout)
+	x = Dense(16, activation = 'relu')(x)
+	x = Dense(16, activation = 'relu')(x)
+	x = Dense(16, activation = 'relu')(x)
 	x = Dense(1, activation = 'sigmoid')(x)
 
 	model = Model([mlp.input,cnn.input], x)
