@@ -20,7 +20,7 @@ class Data_Gen(Sequence):
 		return (self.r[1]-self.r[0]) // self.batch_size
 
 	def __getitem__(self, idx):
-		r = self.r[idx * self.batch_size:(idx + 1) * self.batch_size]
+		r = (idx * self.batch_size,(idx + 1) * self.batch_size)
 		batch_x = []
 		batch_x1 = []
 		batch_y = []
@@ -34,6 +34,32 @@ class Data_Gen(Sequence):
 			batch_x1.append(resize(imread(self.path+"/Images/ISIC_"+'{:07d}'.format(i)+".jpeg"),(768,1024)))
 			if batch_x1[-1].shape[0] != 768 or batch_x1[-1].shape[1] != 1024:
 				print(batch_x1[-1].shape)
-
 		return [np.array(batch_x)
 			, np.array(batch_x1)], np.array(batch_y)
+
+
+def custom_generator(path, r, batch_size):
+	i = 0
+	values = range(r[0],r[1])
+	while True:
+		batch = {'images': [], 'features': [], 'labels': []}
+		for b in range(batch_size):
+			if i == len(values):
+				i = 0
+				random.shuffle(values)
+			
+			with open(self.path+"/Descriptions/ISIC_"+'{:07d}'.format(i)) as file:
+				temp = json.load(file)
+				if temp['meta']['clinical']['age_approx'] == None:
+					continue
+				batch['features'].append(np.array([float(temp['meta']['clinical']['age_approx'])/100, 1 if temp['meta']['clinical']['sex'] == 'm' else 0]))
+				batch['labels'].append(np.array([1]) if temp['meta']['clinical']['benign_malignant'] == 'malignant' else np.array([0]))
+			batch['images'].append(resize(imread(self.path+"/Images/ISIC_"+'{:07d}'.format(i)+".jpeg"),(768,1024)))
+			i += 1
+
+		batch['images'] = np.array(batch['images'])
+		batch['features'] = np.array(batch['features'])
+		# Convert labels to categorical values
+		batch['labels'] = np.array([batch['labels']])
+		yield [batch['images'], batch['features']], batch['labels']
+
