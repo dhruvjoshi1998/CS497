@@ -4,10 +4,11 @@ generator.py
 '''
 
 import numpy as np
-from skimage.io import imread
+from skimage.io import imread, imsave
 from skimage.transform import resize
 import json
 from keras.utils import Sequence
+import os
 
 class Data_Gen(Sequence):
 
@@ -28,8 +29,9 @@ class Data_Gen(Sequence):
 			with open(self.path+"/Descriptions/ISIC_"+'{:07d}'.format(i)) as file:
 				temp = json.load(file)
 				if temp['meta']['clinical']['age_approx'] == None:
-					continue
-				batch_x.append(np.array([float(temp['meta']['clinical']['age_approx'])/100, 1 if temp['meta']['clinical']['sex'] == 'm' else 0]))
+					batch_x.append(np.array([0, 1 if temp['meta']['clinical']['sex'] == 'm' else 0]))
+				else:
+					batch_x.append(np.array([float(temp['meta']['clinical']['age_approx'])/100, 1 if temp['meta']['clinical']['sex'] == 'm' else 0]))
 				batch_y.append(np.array([1]) if temp['meta']['clinical']['benign_malignant'] == 'malignant' else np.array([0]))
 			batch_x1.append(resize(imread(self.path+"/Images/ISIC_"+'{:07d}'.format(i)+".jpeg"),(768,1024)))
 			if batch_x1[-1].shape[0] != 768 or batch_x1[-1].shape[1] != 1024:
@@ -62,4 +64,13 @@ def custom_generator(path, r, batch_size):
 		# Convert labels to categorical values
 		batch['labels'] = np.array([batch['labels']])
 		yield [batch['images'], batch['features']], batch['labels']
+
+def resize_images(path, r):
+	print("resizing:",r)
+	for i in range(r[0],r[1]):
+		if i%100 == 0:
+			print (i)
+		x = imread(path+"/ISIC_"+'{:07d}'.format(i)+".jpeg")
+		imsave(path+"/ISIC_"+'{:07d}'.format(i)+".jpeg",resize(x,(768,1024)))
+
 
